@@ -10,6 +10,7 @@
 #include "indexBuffer.h"
 #include "vertexArray.h"
 #include "shader.h"
+#include "texture.h"
 
 
 static void processUserInputs(GLFWwindow *window){
@@ -30,9 +31,9 @@ int main(void)
     if (!glfwInit())
         return -1;
 
-    GLCall(glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3));
-    GLCall(glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3));
-    GLCall(glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE));
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(1080, 720, "OpenGL", NULL, NULL);
@@ -56,10 +57,10 @@ int main(void)
 
     {
         float positions[] = {
-            -0.5f, -0.5f, // 0
-            0.5f, -0.5f,  // 1
-            0.5f,  0.5f,  // 2
-            -0.5f, 0.5f   // 3
+            -0.5f, -0.5f, 0.0f, 0.0f,
+             0.5f, -0.5f, 1.0f, 0.0f,
+             0.5f,  0.5f, 1.0f, 1.0f,
+            -0.5f,  0.5f, 0.0f, 1.0f
         };
 
         unsigned int indices[] = {
@@ -67,12 +68,16 @@ int main(void)
             2, 3, 0
         };
 
+        GLCall(glEnable(GL_BLEND));
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
         // Initializing the buffers and vertex arrays
         vertexArray va;
 
-        vertexBuffer vb(positions, 4 * 2 * sizeof(float));
+        vertexBuffer vb(positions, 4 * 4 * sizeof(float));
 
         vertexBufferLayout layout;
+        layout.push<float>(2);
         layout.push<float>(2);
         va.bufferAdd(vb, layout);
 
@@ -81,6 +86,10 @@ int main(void)
         Shader Shader("res/shaders/shader.glsl");
         Shader.Bind();
         Shader.setUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
+
+        Texture texture("res/textures/awesomeface.png");
+        texture.Bind();
+        Shader.setUniform1i("u_Texture", 0);
 
         va.Unbind();
         vb.Unbind();
@@ -107,6 +116,7 @@ int main(void)
 
             renderer.Draw(va, ib, Shader);
 
+
             if (r > 1.0f)
                 increment = -0.05f;
             else if (r < 0.0f) 
@@ -115,10 +125,10 @@ int main(void)
             r += increment;
 
             /* Swap front and back buffers */
-            GLCall(glfwSwapBuffers(window));
+            glfwSwapBuffers(window);
 
             /* Poll for and process events */
-            GLCall(glfwPollEvents());
+            glfwPollEvents();
         }
     }
 

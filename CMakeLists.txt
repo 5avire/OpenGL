@@ -9,17 +9,20 @@ find_package(OpenGL REQUIRED)
 set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory(vendor/glfw-3.4)
+add_subdirectory(dependencies/glfw-3.4)
 
-add_library(glew STATIC vendor/glew-2.3.1/src/glew.c)
-target_include_directories(glew PUBLIC vendor/glew-2.3.1/include)
+add_library(glew STATIC dependencies/glew-2.3.1/src/glew.c)
+target_include_directories(glew PUBLIC dependencies/glew-2.3.1/include)
 target_compile_definitions(glew PUBLIC GLEW_STATIC)
 target_link_libraries(glew PUBLIC OpenGL::GL)
+
+add_library(stb_image STATIC vendor/stb_image/stb_image.cpp)
+target_include_directories(stb_image PUBLIC vendor/stb_image)
 
 file(GLOB SRC_FILES src/*.cpp)
 add_executable(theChernoGL ${SRC_FILES})
 target_include_directories(theChernoGL PRIVATE src)
-target_link_libraries(theChernoGL PRIVATE glfw glew)
+target_link_libraries(theChernoGL PRIVATE glfw glew stb_image)
 
 add_custom_target(copy-compile-commands ALL
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
