@@ -5,14 +5,12 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <iostream>
 
-#include "Test.h"
 #include "renderer.h"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include "tests/TestClearColor.h"
 #include "vertexBuffer.h"
 #include "vertexBufferLayout.h"
 #include "indexBuffer.h"
@@ -23,6 +21,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Test.h"
+#include "tests/TestClearColor.h"
+#include "tests/TestTexture2D.h"
 
 const int WIDTH = 1080;
 const int HEIGHT = 720;
@@ -81,6 +82,7 @@ int main(void)
         currentTest = testMenu;
 
         testMenu->RegisterTest<test::TestClearColor>("Clear color");
+        testMenu->RegisterTest<test::TestTexture2D>("Texture2D Quad: 2");
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
