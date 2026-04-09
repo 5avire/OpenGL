@@ -1,9 +1,15 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
 #include <iostream>
 
 #include "renderer.h"
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #include "vertexBuffer.h"
 #include "vertexBufferLayout.h"
@@ -12,16 +18,17 @@
 #include "shader.h"
 #include "texture.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+
+const int WIDTH = 1080;
+const int HEIGHT = 720;
 
 static void processUserInputs(GLFWwindow *window){
     if ( glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS ) 
         glfwSetWindowShouldClose(window, true);
 }
-
-void framebufferSizeCallback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-};
 
 int main(void)
 {
@@ -36,7 +43,7 @@ int main(void)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(1080, 720, "OpenGL", NULL, NULL);
+    window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL", NULL, NULL);
     if (window == NULL)
     {
         glfwTerminate();
@@ -44,10 +51,8 @@ int main(void)
     }
 
     /* Make the window's context current */
-    GLCall(glfwMakeContextCurrent(window));
+    glfwMakeContextCurrent(window);
     std::cout << "OpenGL:" << glGetString(GL_VERSION) << std::endl;
-    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-
 
     GLenum err = glewInit();
     if (err != GLEW_OK)
@@ -57,10 +62,10 @@ int main(void)
 
     {
         float positions[] = {
-            -0.5f, -0.5f, 0.0f, 0.0f,
-             0.5f, -0.5f, 1.0f, 0.0f,
-             0.5f,  0.5f, 1.0f, 1.0f,
-            -0.5f,  0.5f, 0.0f, 1.0f
+             -50.0f,  -50.0f, 0.0f, 0.0f,
+              50.0f,  -50.0f, 1.0f, 0.0f,
+              50.0f,   50.0f, 1.0f, 1.0f,
+             -50.0f,   50.0f, 0.0f, 1.0f
         };
 
         unsigned int indices[] = {
@@ -83,9 +88,11 @@ int main(void)
 
         indexBuffer ib(indices, 6);
 
+        glm::mat4 proj = glm::ortho(0.0f, (float)WIDTH, 0.0f, (float)HEIGHT, -1.0f, 1.0f);
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+
         Shader Shader("res/shaders/shader.glsl");
         Shader.Bind();
-        Shader.setUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
 
         Texture texture("res/textures/awesomeface.png");
         texture.Bind();
@@ -98,8 +105,17 @@ int main(void)
 
         Renderer renderer;
 
-        float r = 0.0f;
-        float increment = 0.05f;
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO();
+
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init("#version 330");
+        ImGui::StyleColorsDark();
+
+        glm::vec3 translationA(200, 100, 0);
+        glm::vec3 translationB(400, 100, 0);
+
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
@@ -111,18 +127,36 @@ int main(void)
             /* Render here */ 
             renderer.Clear();
 
-            Shader.Bind();
-            Shader.setUniform4f("u_Color", r, 0.2f, 0.7f, 1.0f);
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
 
-            renderer.Draw(va, ib, Shader);
+            {
+                ImGui::SliderFloat3("TranslationA: ", &translationA.x, 0.0f, (float)WIDTH);
+                ImGui::SliderFloat3("TranslationB: ", &translationB.x, 0.0f, (float)WIDTH);
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            }
 
+            {
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
+                glm::mat4 mvp = proj * view * model;
+                Shader.Bind();
+                Shader.setUniformMat4f("u_MVP", mvp);
 
-            if (r > 1.0f)
-                increment = -0.05f;
-            else if (r < 0.0f) 
-                increment = 0.05f;
+                renderer.Draw(va, ib, Shader);
+            }
 
-            r += increment;
+            {
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), translationB);
+                glm::mat4 mvp = proj * view * model;
+                Shader.Bind();
+                Shader.setUniformMat4f("u_MVP", mvp);
+
+                renderer.Draw(va, ib, Shader);
+            }
+
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
@@ -131,6 +165,10 @@ int main(void)
             glfwPollEvents();
         }
     }
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;
