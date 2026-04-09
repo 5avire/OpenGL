@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 project(theChernoGL)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug)
+endif()
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -32,9 +36,11 @@ add_library(stb_image STATIC vendor/stb_image/stb_image.cpp)
 target_include_directories(stb_image PUBLIC vendor/stb_image)
 
 file(GLOB SRC_FILES src/*.cpp)
-add_executable(theChernoGL ${SRC_FILES})
+file(GLOB TEST_FILES src/tests/*.cpp)
+add_executable(theChernoGL ${SRC_FILES} ${TEST_FILES})
 target_include_directories(theChernoGL PRIVATE vendor/glm)
 target_include_directories(theChernoGL PRIVATE src)
+target_include_directories(theChernoGL PRIVATE src/tests)
 target_link_libraries(theChernoGL PRIVATE glfw glew stb_image imgui)
 
 add_custom_target(copy-compile-commands ALL
