@@ -1,2 +1,4 @@
 build/
+imgui.ini
+theChernoGL
 compile_commands.json
