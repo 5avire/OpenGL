@@ -3,7 +3,6 @@
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/quaternion_geometric.hpp>
-#include <iomanip>
 #include <iostream>
 
 #include "shader.h"
@@ -47,9 +46,9 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         Camera.Move(DOWN);
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_5))
-        Camera.ChangeCamSpeedBy(0.5f);
+        Camera.ChangeCamSpeedBy(0.05f);
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_4))
-        Camera.ChangeCamSpeedBy(-0.5f);
+        Camera.ChangeCamSpeedBy(-0.05f);
 }
 
 void mouse_callback(GLFWwindow* window, double xPos, double yPos)
@@ -220,7 +219,7 @@ int main()
         timeAccumulator += deltaTime;
         frameCount++;
 
-        if (timeAccumulator > 3)
+        if (timeAccumulator > 2)
         {
             float fps = frameCount / timeAccumulator;
             std::cout << "FPS: " << fps << std::endl;
