@@ -3,6 +3,7 @@
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/quaternion_geometric.hpp>
+#include <iomanip>
 #include <iostream>
 
 #include "shader.h"
@@ -15,26 +16,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <camera.h>
+
+Camera Camera;
+
 const int WIDTH = 1080;
 const int HEIGHT = 720;
 
-// Remember to not make changing values const.... This took you too long to debug and you had to have AI help with this....
-// Also, remember to actually make the cameraSpeed once things are defined....
 float deltaTime = 0.0f;
-float FOV = 55.0f;
-// float cameraSpeed = 2.5f * deltaTime;
-const float cameraSensitivity = 0.1f;
-
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-glm::vec3 cameraRight = glm::vec3(1.0f, 0.0f, 0.0f);
-
-bool firstMouse = true;
-float yaw = -90.0f;
-float pitch = 0.0f;
-double lastX = (float)WIDTH/2;
-double lastY = (float)HEIGHT/2;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -43,61 +32,34 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void processInput(GLFWwindow* window)
 {
-    float cameraSpeed = 2.5f * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cameraPos += cameraFront * cameraSpeed;
+        Camera.Move(FORWARD);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraFront * cameraSpeed;
+        Camera.Move(BACKWARD);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        Camera.Move(LEFT);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        Camera.Move(RIGHT);
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraRight)) * cameraSpeed;
+        Camera.Move(UP);
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraRight)) * cameraSpeed;
+        Camera.Move(DOWN);
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_5))
+        Camera.ChangeCamSpeedBy(0.5f);
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_4))
+        Camera.ChangeCamSpeedBy(-0.5f);
 }
 
 void mouse_callback(GLFWwindow* window, double xPos, double yPos)
 {
-    if (firstMouse)
-    {
-        lastX = xPos;
-        lastY = yPos;
-        firstMouse = false;
-    }
-
-    float xoffset = xPos - lastX;
-    float yoffset = yPos - lastY;
-    lastX = xPos; lastY = yPos;
-
-    xoffset *= cameraSensitivity;
-    yoffset *= cameraSensitivity;
-
-    yaw += xoffset;
-    pitch -= yoffset;
-
-    if (pitch > 89.0f)
-        pitch = 89.0f;
-    if (pitch < -89.0f)
-        pitch = 89.0f;
-
-    glm::vec3 direction;
-    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction.y = sin(glm::radians(pitch));
-    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    cameraFront = glm::normalize(direction);
+    Camera.MouseMovement(xPos, yPos);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    FOV -= (float)yoffset;
-    if (FOV > 55.0f)
-        FOV = 55.0f;
-    if (FOV < 1.0f)
-        FOV = 1.0f;
+    Camera.Zoom(yoffset);
 }
 
 int main()
@@ -115,6 +77,7 @@ int main()
         return -1;
     }
     glfwMakeContextCurrent(window);
+    glfwSwapInterval(0);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -187,17 +150,6 @@ int main()
         glm::vec3(-1.3f,  1.0f, -1.5f)  
     };
 
-    // std::vector<unsigned int> indices;
-    // for (unsigned int i = 0; i <= (12 * 4); i=i+1)
-    // {
-    //     indices.push_back(0 + i);
-    //     indices.push_back(1 + i);
-    //     indices.push_back(2 + i);
-    //     indices.push_back(2 + i);
-    //     indices.push_back(3 + i);
-    //     indices.push_back(0 + i);
-    // }
-
     VertexArray va;
     va.Bind();
 
@@ -221,22 +173,21 @@ int main()
     Shader.setInt("texture2", 1);
 
     glm::mat4 view;
-
     glm::mat4 proj;
     glm::mat4 model;
 
     const float radius = 10.0f;
-    float camX, camZ;
-
-    float& dT = deltaTime;
 
     float currentTime, lastTime;
     lastTime = glfwGetTime();
 
+    static float timeAccumulator = 0.0f;
+    static int frameCount = 0;
+
     while (!glfwWindowShouldClose(window))
     {
         currentTime = glfwGetTime();
-        dT = currentTime - lastTime;
+        deltaTime = currentTime - lastTime;
         lastTime = currentTime;
 
         processInput(window);
@@ -250,19 +201,32 @@ int main()
         container.Bind();
         va.Bind();
 
-        proj = glm::perspective(glm::radians(FOV), (float) WIDTH/ (float) HEIGHT, 0.1f, 100.0f);
-        view  = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        proj = glm::perspective(glm::radians(Camera.GetFOV()), (float) WIDTH/ (float) HEIGHT, 0.1f, 250.0f);
+        Camera.Update(view, deltaTime);
 
         // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         for (int i = 0; i < 10; i++)
         {
             model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
 
             model = glm::rotate(model, i * glm::radians(20.0f), glm::vec3(1.0f, 0.3f, 0.5f));
             glm::mat4 mvp = proj * view * model;
             glUniformMatrix4fv(glGetUniformLocation(Shader.GetID(), "u_MVP"), 1, GL_FALSE, glm::value_ptr(mvp));
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+
+        timeAccumulator += deltaTime;
+        frameCount++;
+
+        if (timeAccumulator > 3)
+        {
+            float fps = frameCount / timeAccumulator;
+            std::cout << "FPS: " << fps << std::endl;
+
+            timeAccumulator = 0;
+            frameCount = 0;
         }
 
         glfwSwapBuffers(window);
