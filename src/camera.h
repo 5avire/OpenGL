@@ -16,21 +16,21 @@ enum Movement {
 class Camera
 {
     private:
-        bool firstMouse = true;
-        float yaw = -90.0f;
-        float pitch = 0.0f;
-        float FOV = 0.0f;
-        float deltaTime;
-        float camSpeed;
-        float camSensitivity;
+        bool m_FirstMouse = true;
+        float m_Yaw = -90.0f;
+        float m_Pitch = 0.0f;
+        float m_FOV = 0.0f;
+        float m_DeltaTime;
+        float m_CamSpeed;
+        float m_CamSensitivity;
 
-        double lastX;
-        double lastY;
+        double m_LastX;
+        double m_LastY;
 
-        glm::vec3 cameraPos;
-        glm::vec3 cameraFront;
-        glm::vec3 cameraUp;
-        glm::vec3 cameraRight;
+        glm::vec3 m_CameraPos;
+        glm::vec3 m_CameraFront;
+        glm::vec3 m_CameraUp;
+        glm::vec3 m_CameraRight;
     public:
         Camera();
         ~Camera();

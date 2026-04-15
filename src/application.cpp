@@ -221,7 +221,7 @@ int main()
         timeAccumulator += deltaTime;
         frameCount++;
 
-        if (timeAccumulator > 1)
+        if (timeAccumulator > 3)
         {
             float fps = frameCount / timeAccumulator;
             std::cout << "FPS: " << fps << std::endl;
