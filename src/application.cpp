@@ -17,7 +17,7 @@
 
 #include <camera.h>
 
-Camera Camera;
+Camera camera;
 
 const int WIDTH = 1080;
 const int HEIGHT = 720;
@@ -34,31 +34,31 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        Camera.Move(FORWARD);
+        camera.Move(FORWARD);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        Camera.Move(BACKWARD);
+        camera.Move(BACKWARD);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        Camera.Move(LEFT);
+        camera.Move(LEFT);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        Camera.Move(RIGHT);
+        camera.Move(RIGHT);
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        Camera.Move(UP);
+        camera.Move(UP);
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-        Camera.Move(DOWN);
+        camera.Move(DOWN);
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_5))
-        Camera.ChangeCamSpeedBy(0.05f);
+        camera.ChangeCamSpeedBy(0.05f);
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_4))
-        Camera.ChangeCamSpeedBy(-0.05f);
+        camera.ChangeCamSpeedBy(-0.05f);
 }
 
 void mouse_callback(GLFWwindow* window, double xPos, double yPos)
 {
-    Camera.MouseMovement(xPos, yPos);
+    camera.MouseMovement(xPos, yPos);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    Camera.Zoom(yoffset);
+    camera.Zoom(yoffset);
 }
 
 int main()
@@ -165,11 +165,11 @@ int main()
     Texture2D awesomeFace("res/texture/awesomeface.png", GL_RGBA, 0);
     Texture2D container("res/texture/container.jpg", GL_RGB, 1);
 
-    Shader Shader("res/shader/vertex.glsl", "res/shader/fragment.glsl");
-    Shader.use();
+    Shader shader("res/shader/vertex.glsl", "res/shader/fragment.glsl");
+    shader.use();
 
-    Shader.setInt("texture1", 0);
-    Shader.setInt("texture2", 1);
+    shader.setInt("texture1", 0);
+    shader.setInt("texture2", 1);
 
     glm::mat4 view;
     glm::mat4 proj;
@@ -183,6 +183,8 @@ int main()
     static float timeAccumulator = 0.0f;
     static int frameCount = 0;
 
+    float clearColor[4] = { 0.105f, 0.105f, 0.105f, 1.0f };
+
     while (!glfwWindowShouldClose(window))
     {
         currentTime = glfwGetTime();
@@ -191,17 +193,17 @@ int main()
 
         processInput(window);
 
-        glClearColor(0.105f, 0.105f, 0.105f, 1.0f);
+        glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        Shader.use();
+        shader.use();
 
         awesomeFace.Bind();
         container.Bind();
         va.Bind();
 
-        proj = glm::perspective(glm::radians(Camera.GetFOV()), (float) WIDTH/ (float) HEIGHT, 0.1f, 250.0f);
-        Camera.Update(view, deltaTime);
+        proj = glm::perspective(glm::radians(camera.GetFOV()), (float) WIDTH/ (float) HEIGHT, 0.1f, 250.0f);
+        camera.Update(view, deltaTime);
 
         // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         for (int i = 0; i < 10; i++)
@@ -211,7 +213,7 @@ int main()
 
             model = glm::rotate(model, i * glm::radians(20.0f), glm::vec3(1.0f, 0.3f, 0.5f));
             glm::mat4 mvp = proj * view * model;
-            glUniformMatrix4fv(glGetUniformLocation(Shader.GetID(), "u_MVP"), 1, GL_FALSE, glm::value_ptr(mvp));
+            shader.setMatrix4f("u_MVP", mvp);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
@@ -219,7 +221,7 @@ int main()
         timeAccumulator += deltaTime;
         frameCount++;
 
-        if (timeAccumulator > 2)
+        if (timeAccumulator > 1)
         {
             float fps = frameCount / timeAccumulator;
             std::cout << "FPS: " << fps << std::endl;

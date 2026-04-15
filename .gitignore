@@ -1,4 +1,4 @@
 build/
 cmake-build-debug/
 compile_commands.json
-helloWorld
+learnGL
