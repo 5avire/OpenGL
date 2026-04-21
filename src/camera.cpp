@@ -1,12 +1,11 @@
 #include "camera.h"
-#include <glm/geometric.hpp>
 
 Camera::Camera()
     : m_CameraPos(glm::vec3(0.0f, 0.0f, 3.0f)),
     m_CameraFront(glm::vec3(0.0f, 0.0f, -1.0f)),
     m_CameraUp(glm::vec3(0.0f, 1.0f, 0.0f)),
     m_CameraRight(glm::vec3(1.0f, 0.0f, 0.0f)),
-    m_CamSpeed(2.5f),
+    m_CamSpeed(1.0f),
     m_CamSensitivity(0.1f),
     m_FirstMouse(true),
     m_Yaw(-90.0f),

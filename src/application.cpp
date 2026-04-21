@@ -1,8 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/ext/quaternion_geometric.hpp>
 #include <iostream>
 
 #include "shader.h"
@@ -11,9 +9,9 @@
 #include "vertexArray.h"
 #include "texture2D.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
 
 #include <camera.h>
 
@@ -23,6 +21,8 @@ const int WIDTH = 1080;
 const int HEIGHT = 720;
 
 float deltaTime = 0.0f;
+
+glm::vec3 lightPos(1.2f, 1.0f,  2.0f);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -46,9 +46,9 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         camera.Move(DOWN);
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_5))
-        camera.ChangeCamSpeedBy(0.05f);
+        camera.ChangeCamSpeedBy(0.01f);
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_4))
-        camera.ChangeCamSpeedBy(-0.05f);
+        camera.ChangeCamSpeedBy(-0.01f);
 }
 
 void mouse_callback(GLFWwindow* window, double xPos, double yPos)
@@ -136,40 +136,39 @@ int main()
         {-0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f}
     };
 
-    glm::vec3 cubePositions[] = {
-        glm::vec3( 0.0f,  0.0f,  0.0f), 
-        glm::vec3( 2.0f,  5.0f, -15.0f), 
-        glm::vec3(-1.5f, -2.2f, -2.5f),  
-        glm::vec3(-3.8f, -2.0f, -12.3f),  
-        glm::vec3( 2.4f, -0.4f, -3.5f),  
-        glm::vec3(-1.7f,  3.0f, -7.5f),  
-        glm::vec3( 1.3f, -2.0f, -2.5f),  
-        glm::vec3( 1.5f,  2.0f, -2.5f), 
-        glm::vec3( 1.5f,  0.2f, -1.5f), 
-        glm::vec3(-1.3f,  1.0f, -1.5f)  
-    };
+    VertexArray cubeVAO;
+    cubeVAO.Bind();
 
-    VertexArray va;
-    va.Bind();
-
-    VertexBuffer vb(vertices);
-    vb.Bind();
+    VertexBuffer VBO(vertices);
+    VBO.Bind();
 
     // IndexBuffer ib(indices);
     // ib.Bind();
 
-    va.PushFloat(3, 0);
-    va.PushFloat(4, 1);
-    va.PushFloat(2, 2);
+    VertexArray lightVAO;
+    lightVAO.Bind();
 
-    Texture2D awesomeFace("res/texture/awesomeface.png", GL_RGBA, 0);
-    Texture2D container("res/texture/container.jpg", GL_RGB, 1);
+    cubeVAO.Bind();
+    cubeVAO.PushFloat(3, 0);
+    cubeVAO.PushFloat(4, 1);
+    cubeVAO.PushFloat(2, 2);
 
-    Shader shader("res/shader/vertex.glsl", "res/shader/fragment.glsl");
-    shader.use();
+    lightVAO.Bind();
+    VBO.Bind();
+    lightVAO.PushFloat(3, 0);
 
-    shader.setInt("texture1", 0);
-    shader.setInt("texture2", 1);
+    // Texture2D awesomeFace("res/texture/awesomeface.png", GL_RGBA, 0);
+    // Texture2D container("res/texture/container.jpg", GL_RGB, 1);
+
+    Shader cubeColorShader("res/shader/colorVertex.glsl", "res/shader/colorFragment.glsl");
+    Shader lightingShader("res/shader/lightingVertex.glsl", "res/shader/lightingFragment.glsl");
+
+    cubeColorShader.use();
+    cubeColorShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+    cubeColorShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+
+    // shader.setInt("texture1", 0);
+    // shader.setInt("texture2", 1);
 
     glm::mat4 view;
     glm::mat4 proj;
@@ -196,27 +195,29 @@ int main()
         glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shader.use();
-
-        awesomeFace.Bind();
-        container.Bind();
-        va.Bind();
+        cubeColorShader.use();
 
         proj = glm::perspective(glm::radians(camera.GetFOV()), (float) WIDTH/ (float) HEIGHT, 0.1f, 250.0f);
         camera.Update(view, deltaTime);
 
-        // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-        for (int i = 0; i < 10; i++)
-        {
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
+        cubeVAO.Bind();
 
-            model = glm::rotate(model, i * glm::radians(20.0f), glm::vec3(1.0f, 0.3f, 0.5f));
-            glm::mat4 mvp = proj * view * model;
-            shader.setMatrix4f("u_MVP", mvp);
+        model = glm::mat4(1.0f);
+        glm::mat4 mvp = proj * view * model;
+        cubeColorShader.setMatrix4f("u_MVP", mvp);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+        lightingShader.use();
+
+        lightVAO.Bind();
+
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.2f));
+
+        mvp = proj * view * model;
+        lightingShader.setMatrix4f("u_MVP", mvp);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         timeAccumulator += deltaTime;
         frameCount++;
