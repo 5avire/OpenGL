@@ -13,7 +13,7 @@ uniform vec3 lightColor;
 
 void main()
 {
-    float ambientStrength = 0.1;
+    float ambientStrength = 0.105;
     vec3 ambient = ambientStrength * lightColor;
 
     // vec4 texColor = mix(texture(texture1, f_TexCoord), texture(texture2, f_TexCoord), 0.5);

@@ -1,11 +1,12 @@
 #pragma once
 
-#include <vector>
+#include <cstddef>
 
 struct Vertex {
     float x, y, z;
     float r, g, b, a;
     float tx, ty;
+    float nx, ny, nz;
 };
 
 class VertexBuffer 
@@ -13,7 +14,7 @@ class VertexBuffer
     private:
         unsigned int m_ID;
     public:
-        VertexBuffer(const std::vector<Vertex>& vertices);
+        VertexBuffer(const Vertex vertices[], size_t noOfData);
         ~VertexBuffer();
 
         unsigned int GetID();

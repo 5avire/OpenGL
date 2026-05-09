@@ -13,5 +13,5 @@ class Renderer
         ~Renderer();
 
         void Clear() const;
-        void Draw(Shader& shader, const VertexArray& va, const IndexBuffer& ib) const;
+        void Draw(Shader& shader, VertexArray& va, IndexBuffer& ib);
 };

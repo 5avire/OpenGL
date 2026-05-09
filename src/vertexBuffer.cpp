@@ -1,11 +1,12 @@
 #include "vertexBuffer.h"
+
 #include <glad/glad.h>
 
-VertexBuffer::VertexBuffer(const std::vector<Vertex>& vertices)
+VertexBuffer::VertexBuffer(const Vertex vertices[], size_t noOfData)
 {
     glGenBuffers(1, &m_ID);
     glBindBuffer(GL_ARRAY_BUFFER, m_ID);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, noOfData ,vertices, GL_DYNAMIC_DRAW);
 }
 
 VertexBuffer::~VertexBuffer()

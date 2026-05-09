@@ -29,10 +29,14 @@ void Camera::Move(Movement movement)
         m_CameraPos -= glm::normalize(glm::cross(m_CameraFront, m_CameraUp)) * movementSpeed;
     if (movement == RIGHT)
         m_CameraPos += glm::normalize(glm::cross(m_CameraFront, m_CameraUp)) * movementSpeed;
+    // if (movement == UP)
+    //     m_CameraPos -= glm::normalize(glm::cross(m_CameraFront, m_CameraRight)) * movementSpeed;
+    // if (movement == DOWN)
+    //     m_CameraPos += glm::normalize(glm::cross(m_CameraFront, m_CameraRight)) * movementSpeed;
     if (movement == UP)
-        m_CameraPos -= glm::normalize(glm::cross(m_CameraFront, m_CameraRight)) * movementSpeed;
+        m_CameraPos += m_CameraUp * movementSpeed;
     if (movement == DOWN)
-        m_CameraPos += glm::normalize(glm::cross(m_CameraFront, m_CameraRight)) * movementSpeed;
+        m_CameraPos -= m_CameraUp * movementSpeed;
 }
 
 void Camera::Update(glm::mat4& view, float deltaValue)

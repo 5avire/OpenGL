@@ -3,10 +3,11 @@
 #include <glad/glad.h>
 
 IndexBuffer::IndexBuffer(const std::vector<unsigned int>& indices)
+    : m_Count(indices.size())
 {
     glGenBuffers(1, &m_ID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Count * sizeof(unsigned int), indices.data(), GL_DYNAMIC_DRAW);
 }
 
 IndexBuffer::~IndexBuffer()
@@ -16,6 +17,11 @@ IndexBuffer::~IndexBuffer()
 unsigned int IndexBuffer::GetID()
 {
     return m_ID;
+}
+
+unsigned int IndexBuffer::GetCount()
+{
+    return m_Count;
 }
 
 void IndexBuffer::Bind() const
