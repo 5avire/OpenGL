@@ -1,6 +1,6 @@
 #include "TestTexture2D.h"
 
-#include <glm/gtc/matrix_transform.hpp>
+#include <gtc/matrix_transform.hpp>
 
 #include <imgui.h>
 #include <strings.h>

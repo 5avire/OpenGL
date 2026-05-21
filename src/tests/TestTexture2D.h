@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Test.h"
-#include <glm/glm.hpp>
+#include <glm.hpp>
 
 #include <vertexBuffer.h>
 #include <vertexBufferLayout.h>

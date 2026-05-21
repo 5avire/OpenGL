@@ -1,8 +1,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
+#include <ext/matrix_clip_space.hpp>
+#include <ext/matrix_transform.hpp>
 #include <iostream>
 
 #include "renderer.h"
@@ -18,8 +18,8 @@
 #include "shader.h"
 #include "texture.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
 
 #include "Test.h"
 #include "tests/TestClearColor.h"
@@ -56,6 +56,7 @@ int main(void)
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
     std::cout << "OpenGL:" << glGetString(GL_VERSION) << std::endl;
+    glfwSwapInterval(0);
 
     GLenum err = glewInit();
     if (err != GLEW_OK)
