@@ -3,12 +3,33 @@
 #include "camera.h"
 #include <iostream>
 
-extern Camera camera;
+#include "global.h"
 
+extern Camera camera;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    glViewport(0, 0, width, height);
+    unsigned int targetWidth, targetHeight;
+
+    float initialAspect = (float)WIDTH / (float)HEIGHT;
+
+    float newAspect = (float)width / (float)height;
+
+    if (newAspect > initialAspect)
+    {
+        targetHeight = height;
+        targetWidth = height * initialAspect;
+    }
+    else 
+    {
+        targetWidth = width;
+        targetHeight = width / initialAspect;
+    }
+
+    unsigned int x = (width - targetWidth) / 2;
+    unsigned int y = (height - targetHeight) / 2;
+
+    glViewport(x, y, targetWidth, targetHeight);
 }
 
 void mouse_callback(GLFWwindow* window, double xPos, double yPos)
