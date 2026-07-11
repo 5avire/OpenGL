@@ -44,6 +44,11 @@ glm::vec3 Camera::GetPos() const
     return m_CameraPos;
 }
 
+glm::vec3 Camera::GetFront() const
+{
+    return m_CameraFront;
+}
+
 void Camera::Update(glm::mat4& view, float deltaValue)
 {
     m_DeltaTime = deltaValue;

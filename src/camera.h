@@ -43,5 +43,6 @@ class Camera
         void ChangeCamSpeedBy(float x);
 
         float GetFOV() const;
+        glm::vec3 GetFront() const;
         glm::vec3 GetPos() const;
 };

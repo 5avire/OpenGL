@@ -5,9 +5,7 @@ layout (location = 0) out vec4 color;
 in vec4 f_Color;
 in vec2 f_TexCoord;
 
-uniform vec3 u_ObjectColor;
 uniform vec3 u_LightColor;
-uniform vec3 u_ViewPos;
 
 // uniform sampler2D texture1;
 // uniform sampler2D texture2;
