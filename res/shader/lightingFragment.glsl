@@ -5,8 +5,9 @@ layout (location = 0) out vec4 color;
 in vec4 f_Color;
 in vec2 f_TexCoord;
 
-uniform vec3 objectColor;
-uniform vec3 lightColor;
+uniform vec3 u_ObjectColor;
+uniform vec3 u_LightColor;
+uniform vec3 u_ViewPos;
 
 // uniform sampler2D texture1;
 // uniform sampler2D texture2;
@@ -14,5 +15,5 @@ uniform vec3 lightColor;
 void main()
 {
     // vec4 texColor = mix(texture(texture1, f_TexCoord), texture(texture2, f_TexCoord), 0.5);
-    color = vec4(1.0f);
+    color = vec4(u_LightColor, 1.0f);
 }

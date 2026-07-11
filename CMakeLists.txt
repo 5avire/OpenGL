@@ -24,6 +24,7 @@ add_library(imgui STATIC
     vendor/imgui/imgui_impl_opengl3.cpp
 )
 target_include_directories(imgui PUBLIC vendor/imgui)
+target_link_libraries(imgui PRIVATE glfw)
 
 add_library(stb_image STATIC vendor/stb_image/stb_image.cpp)
 target_include_directories(stb_image PUBLIC vendor/stb_image)

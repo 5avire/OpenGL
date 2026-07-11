@@ -8,13 +8,18 @@ layout (location = 3) in vec3 aNormal;
 out vec4 f_Color;
 out vec2 f_TexCoord;
 out vec3 f_Normal;
+out vec3 f_FragPos;
 
-uniform mat4 u_MVP;
+uniform mat4 u_Model;
+uniform mat4 u_View;
+uniform mat4 u_Proj;
 
 void main()
 {
-    gl_Position = u_MVP * vec4(aPos, 1.0f);
+    mat4 MVP = u_Proj * u_View * u_Model;
+    gl_Position = MVP * vec4(aPos, 1.0f);
+    f_FragPos = vec3(u_Model * vec4(aPos, 1.0));
     f_Color = aColor;
     f_TexCoord = aTexCoord;
-    f_Normal = aNormal;
+    f_Normal = mat3(transpose(inverse(u_Model))) * aNormal;
 }

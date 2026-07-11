@@ -91,6 +91,7 @@ int main()
     cubeVAO.PushFloat(3, 0);
     cubeVAO.PushFloat(4, 1);
     cubeVAO.PushFloat(2, 2);
+    cubeVAO.PushFloat(3, 3);
 
     lightVAO.Bind();
     VBO.Bind();
@@ -103,8 +104,12 @@ int main()
     Shader lightingShader("res/shader/lightingVertex.glsl", "res/shader/lightingFragment.glsl");
 
     cubeColorShader.use();
-    cubeColorShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-    cubeColorShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+    cubeColorShader.setVec3("u_ObjectColor", {1.0f, 0.5f, 0.31f});
+    cubeColorShader.setVec3("u_LightColor", {1.0f, 1.0f, 1.0f});
+
+    lightingShader.use();
+    lightingShader.setVec3("u_ObjectColor", {1.0f, 0.5f, 0.31f});
+    lightingShader.setVec3("u_LightColor", {1.0f, 1.0f, 1.0f});
 
     // shader.setInt("texture1", 0);
     // shader.setInt("texture2", 1);
@@ -135,6 +140,8 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         cubeColorShader.use();
+        cubeColorShader.setVec3("u_LightPos", lightPos);
+        cubeColorShader.setVec3("u_ViewPos", camera.GetPos());
 
         proj = glm::perspective(glm::radians(camera.GetFOV()), (float) WIDTH/ (float) HEIGHT, 0.1f, 250.0f);
         camera.Update(view, deltaTime);
@@ -142,8 +149,9 @@ int main()
         cubeVAO.Bind();
 
         model = glm::mat4(1.0f);
-        glm::mat4 mvp = proj * view * model;
-        cubeColorShader.setMatrix4f("u_MVP", mvp);
+        cubeColorShader.setMatrix4f("u_Model", model);
+        cubeColorShader.setMatrix4f("u_View", view);
+        cubeColorShader.setMatrix4f("u_Proj", proj);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         lightingShader.use();
@@ -153,8 +161,9 @@ int main()
         model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f));
 
-        mvp = proj * view * model;
-        lightingShader.setMatrix4f("u_MVP", mvp);
+        lightingShader.setMatrix4f("u_Model", model);
+        lightingShader.setMatrix4f("u_View", view);
+        lightingShader.setMatrix4f("u_Proj", proj);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
 

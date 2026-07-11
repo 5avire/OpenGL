@@ -39,6 +39,11 @@ void Camera::Move(Movement movement)
         m_CameraPos -= m_CameraUp * movementSpeed;
 }
 
+glm::vec3 Camera::GetPos() const
+{
+    return m_CameraPos;
+}
+
 void Camera::Update(glm::mat4& view, float deltaValue)
 {
     m_DeltaTime = deltaValue;
