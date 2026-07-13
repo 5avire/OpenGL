@@ -15,6 +15,15 @@ set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(include/glfw-3.4)
 
+set(ASSIMP_WERROR OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
+add_subdirectory(vendor/assimp)
+target_compile_options(assimp PRIVATE -Wno-error)
+
 add_library(imgui STATIC
     vendor/imgui/imgui.cpp
     vendor/imgui/imgui_draw.cpp
@@ -37,7 +46,7 @@ add_executable(learnGL ${SRC_FILES})
 
 set_target_properties(learnGL PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 target_include_directories(learnGL PRIVATE vendor/glm src)
-target_link_libraries(learnGL PRIVATE glfw glad stb_image imgui OpenGL::GL)
+target_link_libraries(learnGL PRIVATE glfw glad stb_image imgui assimp OpenGL::GL)
 
 add_custom_target(copy-compile-commands ALL
   COMMAND ${CMAKE_COMMAND} -E copy_if_different

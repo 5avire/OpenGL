@@ -1,13 +1,9 @@
 #pragma once
 
 #include <cstddef>
+#include <glm/glm.hpp>
 
-struct Vertex {
-    float x, y, z;
-    float r, g, b, a;
-    float tx, ty;
-    float nx, ny, nz;
-};
+#include "mesh.h"
 
 class VertexBuffer 
 {

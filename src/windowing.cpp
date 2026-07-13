@@ -94,4 +94,15 @@ void Window::processInput(GLFWwindow* window)
         camera.ChangeCamSpeedBy(0.01f);
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_4))
         camera.ChangeCamSpeedBy(-0.01f);
+
+    static bool wireframe = false;
+    static bool lWasPressed = false;
+
+    bool LIsPressed = (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS);
+    bool pressedEdge = LIsPressed && !lWasPressed;
+
+    wireframe ^= pressedEdge;
+    lWasPressed = LIsPressed;
+
+    glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 }
